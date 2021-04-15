@@ -19,6 +19,7 @@ app.listen(PORT, () => console.log(`Server is listening on port ${PORT}`));
 const cors = require('cors');
 app.use(cors());
 
+//no longer will use this
 const weatherData = require('./data/weather.json');
 
 
