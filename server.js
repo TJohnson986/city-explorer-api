@@ -19,17 +19,30 @@ app.listen(PORT, () => console.log(`Server is listening on port ${PORT}`));
 const cors = require('cors');
 app.use(cors());
 
-//no longer will use this
-const weatherData = require('./data/weather.json');
+const superagent = require('superagent');
 
+//no longer will use this
+// const weatherData = require('./data/weather.json')
 
 app.get('/weather', (request, response) => {
-  try {
-    const allDailyForcasts = weatherData.data.map(day => new DailyForcast(day));
-    response.send(allDailyForcasts);
-  } catch (error) {
-    handleErrors(error, response);
-  }
+  superagent.get('https://api.weatherbit.io/v2.0/forecast/daily')
+    .query({
+      key: process.env.WEATHER_API_KEY,
+      units: 'I',
+      lat: request.query.lat,
+      lon: request.query.lon,
+    })
+    .then(weatherData => {
+      console.log(weatherData.body.city_name)
+      response.json(weatherData.body.data.map(x => (new DailyForcast(x)
+      )))
+    })
+  // try {
+  //   const allDailyForcasts = weatherData.data.map(day => new DailyForcast(day));
+  //   response.send(allDailyForcasts);
+  // } catch (error) {
+  //   handleErrors(error, response);
+  // }
 });
 
 function DailyForcast(day) {
