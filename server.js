@@ -21,8 +21,6 @@ app.use(cors());
 
 const superagent = require('superagent');
 
-//no longer will use this
-// const weatherData = require('./data/weather.json')
 
 app.get('/weather', (request, response) => {
   superagent.get('https://api.weatherbit.io/v2.0/forecast/daily')
@@ -37,17 +35,27 @@ app.get('/weather', (request, response) => {
       response.json(weatherData.body.data.map(x => (new DailyForcast(x)
       )))
     })
-  // try {
-  //   const allDailyForcasts = weatherData.data.map(day => new DailyForcast(day));
-  //   response.send(allDailyForcasts);
-  // } catch (error) {
-  //   handleErrors(error, response);
-  // }
+});
+
+app.get('/movies', (request, response) => {
+  superagent.get('https://api.themoviedb.org/3/search/movie')
+    .query({
+      api_key: process.env.MOVIE_API_KEY,
+      query: request.query.city_name,
+    })
+    .then(movieInfo => {s
+      response.send(movieInfo.body.results.map(info => (new CityMovie(info))))
+    })
 });
 
 function DailyForcast(day) {
-  this.date = day.datetime;
-  this.description = day.weather.description;
+  this.title = day.datetime;
+  this.overview = day.weather.description;
+}
+
+function CityMovie(info) {
+  this.info = info.title;
+  this.overview = info.overview;
 }
 
 function handleErrors(error, response) {
