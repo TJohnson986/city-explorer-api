@@ -19,22 +19,44 @@ app.listen(PORT, () => console.log(`Server is listening on port ${PORT}`));
 const cors = require('cors');
 app.use(cors());
 
-//no longer will use this
-const weatherData = require('./data/weather.json');
+const superagent = require('superagent');
 
 
 app.get('/weather', (request, response) => {
-  try {
-    const allDailyForcasts = weatherData.data.map(day => new DailyForcast(day));
-    response.send(allDailyForcasts);
-  } catch (error) {
-    handleErrors(error, response);
-  }
+  superagent.get('https://api.weatherbit.io/v2.0/forecast/daily')
+    .query({
+      key: process.env.WEATHER_API_KEY,
+      units: 'I',
+      lat: request.query.lat,
+      lon: request.query.lon,
+    })
+    .then(weatherData => {
+      console.log(weatherData.body.city_name)
+      response.json(weatherData.body.data.map(x => (new DailyForcast(x)
+      )))
+    })
+});
+
+app.get('/movies', (request, response) => {
+  superagent.get('https://api.themoviedb.org/3/search/movie')
+    .query({
+      api_key: process.env.MOVIE_API_KEY,
+      query: request.query.city,
+    })
+    .then(movieInfo => {
+      response.send(movieInfo.body.results.map(info => (new CityMovie(info))))
+    })
+    .catch(err => (err.request, err.response));
 });
 
 function DailyForcast(day) {
   this.date = day.datetime;
   this.description = day.weather.description;
+}
+
+function CityMovie(info) {
+  this.title = info.title;
+  this.overview = info.overview;
 }
 
 function handleErrors(error, response) {
