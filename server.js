@@ -50,12 +50,12 @@ app.get('/movies', (request, response) => {
 });
 
 function DailyForcast(day) {
-  this.title = day.datetime;
-  this.overview = day.weather.description;
+  this.date = day.datetime;
+  this.description = day.weather.description;
 }
 
 function CityMovie(info) {
-  this.info = info.title;
+  this.title = info.title;
   this.overview = info.overview;
 }
 
